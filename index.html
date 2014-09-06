@@ -34,6 +34,7 @@
 
     var poptart, face, feet, tail;
     var stars, numStars=10, rainbow, rainChunk, numRainChunks=30;
+    var deltaSum=0, tick=0, frame=0, running=true;
 
     var clock = new THREE.Clock();
 
@@ -42,7 +43,7 @@
 
     function helper(o, x, y, z, w, h, d, c){
       var material = new THREE.MeshLambertMaterial( { color: c} );
-      var geometry = new THREE.CubeGeometry(w, h, d, 1, 1, 1);
+      var geometry = new THREE.BoxGeometry(w, h, d, 1, 1, 1);
       var mesh = new THREE.Mesh( geometry, material );
       mesh.position.x=x+(w/2);
       mesh.position.y=y-(h/2);
@@ -337,6 +338,94 @@
       camera.updateProjectionMatrix();
 
       controls.update(dt);
+      if(running) deltaSum+=dt;
+      if(deltaSum>.07){
+        deltaSum=deltaSum%.07;
+        frame=(frame+1)%12;
+        for(var c=0;c<numStars;c++){
+          var tempX=stars[5][c].position.x,
+            tempY=stars[5][c].position.y,
+            tempZ=stars[5][c].position.z;
+          for(var state=5;state>0;state--){
+            var star=stars[state][c];
+            var star2=stars[state-1][c];
+            star.position.x=star2.position.x-8;
+            star.position.y=star2.position.y;
+            star.position.z=star2.position.z;
+            
+            if(star.position.x<-100){
+              star.position.x+=200;
+              star.position.y = Math.random() * 200 - 100;
+              star.position.z = Math.random() * 200 - 100;
+            }
+          }
+          stars[0][c].position.x=tempX;
+          stars[0][c].position.y=tempY;
+          stars[0][c].position.z=tempZ;
+        }
+        switch(frame){
+          case 0://2nd frame
+            face.position.x++;
+            feet.position.x++;
+            break;
+          case 1:
+            face.position.y--;
+            feet.position.x++;
+            feet.position.y--;
+            poptart.position.y--;
+            rainbow.position.x-=9;
+            rainChunk.position.x+=(8*(numRainChunks-1))-1;
+            break;
+          case 2:
+            feet.position.x--;
+            break;
+          case 3:
+            face.position.x--;
+            feet.position.x--;
+            rainbow.position.x+=9;
+            rainChunk.position.x-=(8*(numRainChunks-1))-1;
+            break;
+          case 4:
+            face.position.y++;
+            break;
+          case 5:
+            poptart.position.y++;
+            feet.position.y++;
+            rainbow.position.x-=9;
+            rainChunk.position.x+=(8*(numRainChunks-1))-1;
+            break;
+          case 6://8th frame
+            face.position.x++;
+            feet.position.x++;
+            break;
+          case 7:
+            poptart.position.y--;
+            face.position.y--;
+            feet.position.x++;
+            feet.position.y--;
+            rainbow.position.x+=9;
+            rainChunk.position.x-=(8*(numRainChunks-1))-1;
+            break;
+          case 8:
+            feet.position.x--;
+            break;
+          case 9:
+            face.position.x--;
+            feet.position.x--;
+            rainbow.position.x-=9;
+            rainChunk.position.x+=(8*(numRainChunks-1))-1;
+            break;
+          case 10:
+            face.position.y++;
+            break;
+          case 11://1st frame
+            poptart.position.y++;
+            feet.position.y++;
+            rainbow.position.x+=9;
+            rainChunk.position.x-=(8*(numRainChunks-1))-1;
+            break;
+        }
+      }
     }
 
     function render(dt) {
